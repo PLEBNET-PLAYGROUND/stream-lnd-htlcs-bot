@@ -10,6 +10,7 @@ class Htlc:
             self.incoming_channel = lnd.get_alias_from_channel_id(
                 htlc.incoming_channel_id
             )
+            self.incoming_channel_id = htlc.incoming_channel_id
             self.incoming_channel_capacity = lnd.get_channel_capacity(
                 htlc.incoming_channel_id
             )
@@ -25,6 +26,7 @@ class Htlc:
             self.outgoing_channel = lnd.get_alias_from_channel_id(
                 htlc.outgoing_channel_id
             )
+            self.outgoing_channel_id = htlc.outgoing_channel_id
             self.outgoing_channel_capacity = lnd.get_channel_capacity(
                 htlc.outgoing_channel_id
             )
