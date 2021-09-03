@@ -13,7 +13,6 @@ def install(c):
             c.run("git clone https://github.com/routablespace/stream-lnd-htlcs-bot.git")
         with c.cd("stream-lnd-htlcs-bot"):
             c.run("git pull")
-        c.run("git checkout dev")
 
 
 @task
