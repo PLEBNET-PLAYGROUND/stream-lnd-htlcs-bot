@@ -1,3 +1,8 @@
+.envrc
+*.json
+*.log
+*.out
+token
 lnd_grpc/*proto
 __pycache__
 *.pyc
