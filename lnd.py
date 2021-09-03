@@ -14,11 +14,16 @@ MESSAGE_SIZE_MB = 50 * 1024 * 1024
 
 class Lnd:
     def __init__(self, lnd_dir):
-        os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
+        os.environ["GRPC_SSL_CIPHER_SUITES"] = "HIGH+ECDSA"
         lnd_dir = expanduser(lnd_dir)
         combined_credentials = self.get_credentials(lnd_dir)
-        channel_options = [('grpc.max_message_length', MESSAGE_SIZE_MB), ('grpc.max_receive_message_length', MESSAGE_SIZE_MB)]
-        grpc_channel = grpc.secure_channel("localhost:10009", combined_credentials, channel_options)
+        channel_options = [
+            ("grpc.max_message_length", MESSAGE_SIZE_MB),
+            ("grpc.max_receive_message_length", MESSAGE_SIZE_MB),
+        ]
+        grpc_channel = grpc.secure_channel(
+            "localhost:10009", combined_credentials, channel_options
+        )
         self.stub = lnrpc.LightningStub(grpc_channel)
         self.router_stub = lnrouterrpc.RouterStub(grpc_channel)
         self.info = None
@@ -26,18 +31,31 @@ class Lnd:
 
     @staticmethod
     def get_credentials(lnd_dir):
-        tls_certificate = open(lnd_dir + '/tls.cert', 'rb').read()
+        tls_certificate = open(lnd_dir + "/tls.cert", "rb").read()
         ssl_credentials = grpc.ssl_channel_credentials(tls_certificate)
-        macaroon = codecs.encode(open(lnd_dir + '/data/chain/bitcoin/mainnet/readonly.macaroon', 'rb').read(), 'hex')
-        auth_credentials = grpc.metadata_call_credentials(lambda _, callback: callback([('macaroon', macaroon)], None))
-        combined_credentials = grpc.composite_channel_credentials(ssl_credentials, auth_credentials)
+        macaroon = codecs.encode(
+            open(
+                lnd_dir + "/data/chain/bitcoin/mainnet/readonly.macaroon", "rb"
+            ).read(),
+            "hex",
+        )
+        auth_credentials = grpc.metadata_call_credentials(
+            lambda _, callback: callback([("macaroon", macaroon)], None)
+        )
+        combined_credentials = grpc.composite_channel_credentials(
+            ssl_credentials, auth_credentials
+        )
         return combined_credentials
 
     def get_node_alias(self, pub_key):
-        return self.stub.GetNodeInfo(ln.NodeInfoRequest(pub_key=pub_key, include_channels=False)).node.alias
+        return self.stub.GetNodeInfo(
+            ln.NodeInfoRequest(pub_key=pub_key, include_channels=False)
+        ).node.alias
 
     def get_channels(self):
-        return self.stub.ListChannels(ln.ListChannelsRequest(active_only=False)).channels
+        return self.stub.ListChannels(
+            ln.ListChannelsRequest(active_only=False)
+        ).channels
 
     def get_alias_from_channel_id(self, chan_id):
         for channel in self.get_channels():
