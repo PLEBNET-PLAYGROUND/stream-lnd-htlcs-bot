@@ -25,7 +25,29 @@ pip3 install -r requirements.txt
 - Create a Telegram bot via Bot Father.
 - Copy the access token.
 - Run the script with `stream-lnd-htlcs-bot.py --tg-token <TG TOKEN>`
-- Running the script will output HTLC event information both to the screen and to a file.
+- In your bot, run the `/connect` command to save a chat id locally.
+- Running the script will output HTLC event information both to the screen and to an sqlite database.
+
+### Bot commands
+
+```
+/connect run this so the bot can initiate chats with you
+/start start receiving events
+/stop to stop receiving events
+/filter <filter> a jq select (see examples)
+/csv Export HTLCs as csv file and send.
+/sends Generate a bar chart of SEND forward and fail events, and send.
+/excel Export HTLCs as excel file and send.
+
+Filter examples:
+
+# filter for failed events
+/filter select( .event_outcome | contains("link_fail_event"))
+
+# filter for failed events, and format to plain text
+/filter select( .event_outcome | contains("link_fail_event")) | to_entries[] | "\(.key)=\(.value)"
+```
+
 
 ### Command line arguments
 

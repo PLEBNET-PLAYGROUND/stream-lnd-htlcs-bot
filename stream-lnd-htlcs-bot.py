@@ -12,9 +12,11 @@
 import argparse
 import json
 import traceback
+import os
 
 from simple_chalk import white, blue, red
 import pandas as pd
+import sqlalchemy
 import threading
 
 from htlc import Htlc
@@ -43,7 +45,13 @@ def thread_function(lnd, args):
         update_logic.update(htlc)
         obj = schemas.HTLC.parse_obj(flatten(htlc.__dict__))
         df = pd.DataFrame(data=[obj.dict()])
-        df.to_sql("htlcs", if_exists="append", con=engine)
+        try:
+            df.to_sql("htlcs", if_exists="append", con=engine)
+        except sqlalchemy.exc.OperationalError as e:
+            print(red(e))
+            print(red("Possible schema change - removing db"))
+            if os.path.exists("stream-lnd-htlcs-bot.db"):
+                os.unlink("stream-lnd-htlcs-bot.db")
 
 
 def main():
