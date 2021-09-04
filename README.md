@@ -30,20 +30,12 @@ pip3 install -r requirements.txt
 ### Command line arguments
 
 ```
-usage: stream-lnd-htlcs-bot.py [-h] [--lnd-dir LNDDIR] [--output-file OUTFILE] [--stream-mode STREAMMODE] [--silent SILENT]
-                           [--human-dates HUMANDATES] [--tg-token TG_TOKEN]
+usage: stream-lnd-htlcs-bot.py [-h] [--lnd-dir LNDDIR] [--tg-token TG_TOKEN]
 
 optional arguments:
-  -h, --help            show this help message and exit
-  --lnd-dir LNDDIR      lnd directory; default ~/.lnd
-  --output-file OUTFILE
-                        HTLC stream output file; default htlc-stream.json
-  --stream-mode STREAMMODE
-                        Stream output to stdout only; default false
-  --silent SILENT       Disable stdout output; default false
-  --human-dates HUMANDATES
-                        Human friendly datetime; default false
-  --tg-token TG_TOKEN   Telegram bot token
+  -h, --help           show this help message and exit
+  --lnd-dir LNDDIR     lnd directory; default ~/.lnd
+  --tg-token TG_TOKEN  Telegram bot token
 ```
 
 ### Example output
