@@ -1,4 +1,4 @@
-# stream-lnd-htlcs
+# stream-lnd-htlcs-bot
 
 Stream all HTLC events from an `lnd` node. Includes information about event type, event fate, incoming/outgoing peers, incoming/outgoing channel balance, and additional information depending on the event type. Basically, it's the default HTLC stream provided by the gRPC API but with a little spice.
 
@@ -24,13 +24,13 @@ pip3 install -r requirements.txt
 
 - Create a Telegram bot via Bot Father.
 - Copy the access token.
-- Run the script with `stream-lnd-htlcs.py --tg-token <TG TOKEN>`
+- Run the script with `stream-lnd-htlcs-bot.py --tg-token <TG TOKEN>`
 - Running the script will output HTLC event information both to the screen and to a file.
 
 ### Command line arguments
 
 ```
-usage: stream-lnd-htlcs.py [-h] [--lnd-dir LNDDIR] [--output-file OUTFILE] [--stream-mode STREAMMODE] [--silent SILENT]
+usage: stream-lnd-htlcs-bot.py [-h] [--lnd-dir LNDDIR] [--output-file OUTFILE] [--stream-mode STREAMMODE] [--silent SILENT]
                            [--human-dates HUMANDATES] [--tg-token TG_TOKEN]
 
 optional arguments:
