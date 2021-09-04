@@ -1,3 +1,10 @@
+connect.txt
+.DS_Store
+db/
+*.xlsx
+*.csv
+*.png
+*.db
 .envrc
 *.json
 *.log

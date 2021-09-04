@@ -6,3 +6,7 @@ protobuf==3.17.3
 jq==1.2.1
 python-telegram-bot
 simple-chalk==0.1.0
+pandas
+sqlalchemy
+pydantic
+openpyxl

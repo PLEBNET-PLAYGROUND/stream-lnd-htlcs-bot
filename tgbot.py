@@ -1,19 +1,92 @@
 #!/usr/bin/env python
 
+#                  __       __   __
+#   _______  __ __/ /____ _/ /  / /__   ___ ___  ___ ________
+#  / __/ _ \/ // / __/ _ `/ _ \/ / -_) (_-</ _ \/ _ `/ __/ -_)
+# /_/  \___/\_,_/\__/\_,_/_.__/_/\__(_)___/ .__/\_,_/\__/\__/
+#                                        /_/
+# We route payments.
+# Provided as is. Use at own risk of being awesome.
+#
+
+import os
+import traceback
+import importlib
+from glob import glob
+import inspect
+from textwrap import dedent
+from functools import partial
+
+import jq
+
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
-from textwrap import dedent
 
-shared_data = {"update": None, "filter": None}
+
+class UpdateLogic:
+
+    _filter = ""
+    _updater = None
+    _start = False
+    _chat_id = None
+    send_message = None
+
+    def init(self, updater):
+        self._chat_id = None
+        self._updater = updater
+        if os.path.exists("connect.txt"):
+            with open("connect.txt") as f:
+                self._chat_id = int(f.read().strip())
+                self.init_funcs()
+                self.greet()
+
+    def init_funcs(self):
+        self.send_message = partial(
+            self._updater.bot.send_message, chat_id=self._chat_id
+        )
+
+    def connect(self, chat_id):
+        with open("connect.txt", "w") as f:
+            f.write(str(chat_id))
+            self._chat_id = chat_id
+        self.init_funcs()
+
+    def filter(self, htlc):
+        try:
+            return jq.compile(self._filter).input(htlc.__dict__).text()
+        except:
+            return str(traceback.format_exc())
+
+    def update(self, htlc):
+        if self._start and self.send_message:
+            txt = self.filter(htlc) if self._filter else str(htlc.__dict__)
+            if txt:
+                self.send_message(text=txt)
+
+    def greet(self):
+        if self.send_message:
+            self.send_message(text="Connected")
+
+
+update_logic = UpdateLogic()
+
+plugins = []
 
 
 def help_func(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(
         dedent(
             """
-            Use /start to start receiving events
-            Use /filter <filter> a jq select
-            Use /stop to stop receiving events
+            /connect run this so the bot can initiate chats with you
+            /start start receiving events
+            /stop to stop receiving events
+            /filter <filter> a jq select (see examples)
+            """
+        )
+        + "\n".join(plugins)
+        + dedent(
+            """
+
 
             Filter examples:
 
@@ -21,7 +94,7 @@ def help_func(update: Update, context: CallbackContext) -> None:
             /filter select( .event_outcome | contains("link_fail_event"))
 
             # filter for failed events, and format to plain text
-            /filter select( .event_outcome | contains("link_fail_event")) | to_entries[] | "\(.key)=\(.value)" 
+            /filter select( .event_outcome | contains("link_fail_event")) | to_entries[] | "\\(.key)=\\(.value)" 
             """
         )
     )
@@ -29,27 +102,50 @@ def help_func(update: Update, context: CallbackContext) -> None:
 
 def filter_func(update: Update, context: CallbackContext) -> None:
     print(context.args)
-    shared_data["filter"] = " ".join(context.args)
+    update_logic._filter = " ".join(context.args)
     update.message.reply_text("Filter set.")
 
 
 def start(update: Update, context: CallbackContext) -> None:
-    shared_data["update"] = update
+    update_logic._start = True
     update.message.reply_text("Starting. You'll recieve events here as they occur.")
 
 
 def stop(update: Update, context: CallbackContext) -> None:
-    shared_data["update"] = None
+    update_logic._start = False
     update.message.reply_text("Stopping.")
+
+
+def connect(update: Update, context: CallbackContext) -> None:
+    update_logic.connect(update.message.chat_id)
+    update.message.reply_text(f"Connected.")
 
 
 def main(token) -> None:
     updater = Updater(token)
+    update_logic.init(updater)
+
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("stop", stop))
     dispatcher.add_handler(CommandHandler("filter", filter_func))
     dispatcher.add_handler(CommandHandler("help", help_func))
+    dispatcher.add_handler(CommandHandler("connect", connect))
+
+    for plug in glob("plugins/*.py"):
+        print(f"Loading plugin: {plug}")
+        try:
+            main = importlib.import_module(
+                os.path.splitext(plug)[0].replace("/", ".")
+            ).main
+            cmd = os.path.splitext(plug)[0].split("/")[-1]
+            plugins.append(f"/{cmd} {inspect.getdoc(main)}")
+            dispatcher.add_handler(CommandHandler(cmd, main))
+            print(f"Loaded")
+        except:
+            print(f"Failed loading: {plug}")
+            print(str(traceback.format_exc()))
+
     updater.start_polling()
     updater.idle()
 

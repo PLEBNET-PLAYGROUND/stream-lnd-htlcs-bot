@@ -1,38 +1,49 @@
 #!/usr/bin/env python3
 
+#                  __       __   __
+#   _______  __ __/ /____ _/ /  / /__   ___ ___  ___ ________
+#  / __/ _ \/ // / __/ _ `/ _ \/ / -_) (_-</ _ \/ _ `/ __/ -_)
+# /_/  \___/\_,_/\__/\_,_/_.__/_/\__(_)___/ .__/\_,_/\__/\__/
+#                                        /_/
+# We route payments.
+# Provided as is. Use at own risk of being awesome.
+#
+
 import argparse
-from lnd import Lnd
-from htlc import Htlc
 import json
-import threading
-from simple_chalk import chalk, green, white, blue, red
-from tgbot import main as bot_main, shared_data
-import jq
 import traceback
+
+from simple_chalk import white, blue, red
+import pandas as pd
+import threading
+
+from htlc import Htlc
+from lnd import Lnd
+from database import engine
+import schemas
+from tgbot import main as bot_main, update_logic
+
+
+def flatten(d):
+    def items():
+        for key, value in d.items():
+            if isinstance(value, dict):
+                for subkey, subvalue in flatten(value).items():
+                    yield key + "_" + subkey, subvalue
+            else:
+                yield key, value
+
+    return dict(items())
 
 
 def thread_function(lnd, args):
     for response in lnd.get_htlc_events():
-        htlc = Htlc(lnd, response, args.humandates)
-        if args.silent == "false":
-            print(htlc.__dict__)
-            if shared_data["update"]:
-                if shared_data["filter"]:
-                    try:
-                        txt = (
-                            jq.compile(shared_data["filter"])
-                            .input(htlc.__dict__)
-                            .text()
-                        )
-                    except:
-                        txt = str(traceback.format_exc())
-                else:
-                    txt = str(htlc.__dict__)
-                if txt:
-                    shared_data["update"].message.reply_text(txt)
-        if args.streammode == "false":
-            with open(args.outfile, "a") as f:
-                print(htlc.__dict__, file=f)
+        htlc = Htlc(lnd, response)
+        print(htlc.__dict__)
+        update_logic.update(htlc)
+        obj = schemas.HTLC.parse_obj(flatten(htlc.__dict__))
+        df = pd.DataFrame(data=[obj.dict()])
+        df.to_sql("htlcs", if_exists="append", con=engine)
 
 
 def main():
@@ -44,37 +55,13 @@ def main():
         help="lnd directory; default ~/.lnd",
     )
     arg_parser.add_argument(
-        "--output-file",
-        default="htlc-stream.json",
-        dest="outfile",
-        help="HTLC stream output file; default htlc-stream.json",
-    )
-    arg_parser.add_argument(
-        "--stream-mode",
-        default="false",
-        dest="streammode",
-        help="Stream output to stdout only; default false",
-    )
-    arg_parser.add_argument(
-        "--silent",
-        default="false",
-        dest="silent",
-        help="Disable stdout output; default false",
-    )
-    arg_parser.add_argument(
-        "--human-dates",
-        default="false",
-        dest="humandates",
-        help="Human friendly datetime; default false",
-    )
-    arg_parser.add_argument(
         "--tg-token",
         dest="tg_token",
         help="Telegram bot token",
     )
     args = arg_parser.parse_args()
 
-    print(red("Starting stream-lnd-htlcs:"))
+    print(red("Starting stream-lnd-htlcs-bot:"))
     for k, v in args.__dict__.items():
         print(f"{blue(k):<20}: {white(v)}")
 

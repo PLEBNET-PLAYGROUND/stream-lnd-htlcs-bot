@@ -5,7 +5,7 @@ import datetime
 
 
 class Htlc:
-    def __init__(self, lnd, htlc, humandates):
+    def __init__(self, lnd, htlc):
         if getattr(htlc, "incoming_channel_id") != 0:
             self.incoming_channel = lnd.get_alias_from_channel_id(
                 htlc.incoming_channel_id
@@ -38,12 +38,7 @@ class Htlc:
             )
         else:
             self.outgoing_channel = lnd.get_own_alias()
-        if humandates == "false":
-            self.timestamp = int(htlc.timestamp_ns / 1e9)
-        else:
-            self.timestamp = datetime.datetime.utcfromtimestamp(
-                int(htlc.timestamp_ns / 1e9)
-            ).strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = int(htlc.timestamp_ns / 1e9)
         self.event_type = self.get_enum_name_from_value(
             htlc.EventType.items(), htlc.event_type
         )
