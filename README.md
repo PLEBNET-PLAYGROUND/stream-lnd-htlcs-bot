@@ -35,9 +35,14 @@ pip3 install -r requirements.txt
 /start start receiving events
 /stop to stop receiving events
 /filter <filter> a jq select (see examples)
-/csv Export HTLCs as csv file and send.
+
+Plugins:
+
+/fails Generate plots of incoming and outgoing link fail event channels
+/export_csv Export HTLCs as csv file and send.
 /sends Generate a bar chart of SEND forward and fail events, and send.
-/excel Export HTLCs as excel file and send.
+/export_excel Export HTLCs as excel file and send.
+
 
 Filter examples:
 

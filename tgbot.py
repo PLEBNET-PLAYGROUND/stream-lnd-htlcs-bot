@@ -81,6 +81,9 @@ def help_func(update: Update, context: CallbackContext) -> None:
             /start start receiving events
             /stop to stop receiving events
             /filter <filter> a jq select (see examples)
+
+            Plugins:
+
             """
         )
         + "\n".join(plugins)

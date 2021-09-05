@@ -8,7 +8,7 @@
 #
 
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import CallbackContext
 import pandas as pd
 import matplotlib as mpl
 import traceback
