@@ -111,7 +111,11 @@ If you get a response, you should be good.
 
 ## Deployment
 
-If the bot is responding to you, the final step is making sure the process keeps on running in the background, even after your `ssh` session ends. The most standard (but somewhat hacky) way of doing this:
+If the bot is responding to you, the final step is making sure the process keeps on running in the background, even after your `ssh` session ends.
+
+### Using nohup
+
+The most hacky way of doing this:
 
 ```
 nohup ./stream-lnd-htlcs-bot.py --lnd-dir /home/umbrel/umbrel/lnd --tg-token MY_TG_TOKEN > /dev/null 2>&1 & disown
@@ -121,4 +125,33 @@ If you ever need to kill the process, you can safely do so:
 
 ```
 pkill -f stream-lnd-htlcs-bot.py
+```
+### Using systemd
+
+A somewhat more standard way of deploying the bot is systemd. 
+
+- Modify [/confs/stream-lnd-htlcs-bot.service](/confs/stream-lnd-htlcs-bot.service).
+
+```
+
+# install the service file
+sudo cp stream-lnd-htlcs-bot.service /etc/systemd/system/stream-lnd-htlcs-bot.service
+
+# ask systemd to reload the service files
+sudo systemctl daemon-reload
+
+# get service status
+sudo systemctl status stream-lnd-htlcs-bot
+
+# enable service for boot
+sudo systemctl enable stream-lnd-htlcs-bot
+
+# start service for boot
+sudo systemctl start stream-lnd-htlcs-bot
+
+# disable service
+sudo systemctl disable stream-lnd-htlcs-bot
+
+# stop
+sudo systemctl stop stream-lnd-htlcs-bot
 ```

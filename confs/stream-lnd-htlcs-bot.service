@@ -1,0 +1,20 @@
+# Stream LND HTLCS Bot
+#
+# Run stream-lnd-htlcs-bot.py as a service
+#
+
+[Unit]
+Description=Stream LND HTLCS Service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/home/umbrel/stream-lnd-htlcs
+ExecStart=/usr/bin/python3 /home/umbrel/stream-lnd-htlcs-bot/stream-lnd-htlcs-bot.py --lnd-dir /home/umbrel/umbrel/lnd
+StandardInput=tty-force
+User=umbrel
+Group=umbrel
+
+[Install]
+WantedBy=multi-user.target

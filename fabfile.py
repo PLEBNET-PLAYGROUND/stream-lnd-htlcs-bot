@@ -28,16 +28,16 @@ def install_supervisord_conf(c, tg_token):
     """
     Install supervisord config
     """
-    with open("confs/stream-lnd-htlcs.conf") as f:
+    with open("confs/stream-lnd-htlcs-bot.conf") as f:
         conf = f.read()
         if tg_token:
             conf = conf.replace("{OPTIONS}", f"--tg-token={tg_token}")
         tf = NamedTemporaryFile(mode="w")
         tf.write(conf)
         tf.flush()
-        c.put(tf.name, "/tmp/stream-lnd-htlcs.conf")
+        c.put(tf.name, "/tmp/stream-lnd-htlcs-bot.conf")
         tf.close()
-        c.sudo("cp /tmp/stream-lnd-htlcs.conf /etc/supervisor/conf.d/")
+        c.sudo("cp /tmp/stream-lnd-htlcs-bot.conf /etc/supervisor/conf.d/")
         c.sudo("supervisorctl update all")
 
 
