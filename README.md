@@ -1,121 +1,118 @@
-# stream-lnd-htlcs-bot
+# HTLC Telegram Bot
 
-Stream all HTLC events from an `lnd` node. Includes information about event type, event fate, incoming/outgoing peers, incoming/outgoing channel balance, and additional information depending on the event type. Basically, it's the default HTLC stream provided by the gRPC API but with a little spice.
+This bot sends your lightning node's live [HTLC](https://en.bitcoin.it/wiki/Hash_Time_Locked_Contracts) events as they occur. By default it sends everything, which can get noisy, so it has a `/filter` command, to selectively filter the events you are interested in.
+
+It also stores your HTLCs in a [database file](https://www.sqlite.org/index.html), so that it can send you reports. It is easy to use, and thus accessible to non-developers.
+
+## Why is monitoring HTLCs important
+
+As a good node operator, you'll want to keep an eye on failed HTLC events (`link_fail_event`). These take place when your node fails to route. Minimizing those via the proper use of balanced channels, or the proper use of fees does two things, with two broad consequences:
+
+- It increases the likelihood of the network routing via your node.
+	- Thus boosts your chances to earn sats.
+- It increases the overall health of the network.
+	- Thus increases the chances of lightning growing healthily, and ultimately succeeding.
+
+> "It appears that even after 25 retries, temporary errors are still the most
+common".
+> 
+> Exerpt from 'Understanding the Lightning Network capability to route
+payments' [(pdf)](http://essay.utwente.nl/82015/1/Satcs_BA_EEMCS.pdf).
+
+The first step to solving a problem is identifying it. This bot does that for you.
+
+## Bot commands
+
+### `/connect`
+
+Run this so the bot can initiate chats with you.
+
+### `/start`
+
+Start receiving events.
+
+### `/stop`
+
+Stop receiving events.
+
+### `/filter <filter>`
+
+Filter the events to only the ones you're interested in.
+
+### `/help`
+
+List available commands, and get help on using them.
+
+## JQ filtering
+
+The `/filter` command takes a [jq](https://stedolan.github.io/jq/) string. Examples are provided by running the `/help` command.
+
+## Plugins
+
+The bot has a 'plugin' ability, so other devs and technical users can write their own commands by just copying an existing plugin and modifying it. Current plugins are:
+
+### `/export_csv` 
+
+Export HTLCs as csv file and send.
+
+### `/export_excel` 
+
+Export HTLCs as excel file and send.
+
+### `/fails` 
+
+Generate plots of incoming and outgoing link fail event channels
+
+### `/sends` 
+
+Generate a bar chart of SEND forward and fail events, and send.
+
+
 
 ## Installation
 
-You'll need an active `lnd`, version 0.9.0+ (https://github.com/lightningnetwork/lnd), with routerrpc built in, Python 3 and the requirements.
+In Telegram, make sure you first create a bot with Bot Father, and take note of your Bot's token. Secondly, have a quick glance at the code or ask a developer to quickly audit the code before running it on your node. Don't trust, verify.
 
-Get the Repository in the directory where you want to install
 ```
+# ssh into your lightning node
+ssh me@node_ip_address
+
+# create a src directory
+mkdir -p src
+
+# enter the src directory
+cd src
+
+# clone this repo
 git clone https://github.com/routablespace/stream-lnd-htlcs-bot.git
-```
-Change Directory
-```
+
+# enter the cloned repo
 cd stream-lnd-htlcs-bot
-```
-Install
 
-```
+# install the dependencies
 pip3 install -r requirements.txt
+
+# run the bot
+./stream-lnd-htlcs-bot.py --tg-token <Bot's TG TOKEN>
+
+# same command but for umbrel users:
+./stream-lnd-htlcs-bot.py --tg-token <Bot's TG TOKEN> --lnd-dir /home/umbrel/umbrel/lnd 
 ```
 
-## Usage
+In telegram, you should now be able to run the `/connect` command, followed by the `/start` command.
 
-- Create a Telegram bot via Bot Father.
-- Copy the access token.
-- Run the script with `stream-lnd-htlcs-bot.py --tg-token <TG TOKEN>`
-- In your bot, run the `/connect` command to save a chat id locally.
-- Running the script will output HTLC event information both to the screen and to an sqlite database.
-
-### Bot commands
-
-```
-/connect run this so the bot can initiate chats with you
-/start start receiving events
-/stop to stop receiving events
-/filter <filter> a jq select (see examples)
-
-Plugins:
-
-/fails Generate plots of incoming and outgoing link fail event channels
-/export_csv Export HTLCs as csv file and send.
-/sends Generate a bar chart of SEND forward and fail events, and send.
-/export_excel Export HTLCs as excel file and send.
-
-
-Filter examples:
-
-# filter for failed events
-/filter select( .event_outcome | contains("link_fail_event"))
-
-# filter for failed events, and format to plain text
-/filter select( .event_outcome | contains("link_fail_event")) | to_entries[] | "\(.key)=\(.value)"
-```
-
-
-### Command line arguments
-
-```
-usage: stream-lnd-htlcs-bot.py [-h] [--lnd-dir LNDDIR] [--tg-token TG_TOKEN]
-
-optional arguments:
-  -h, --help           show this help message and exit
-  --lnd-dir LNDDIR     lnd directory; default ~/.lnd
-  --tg-token TG_TOKEN  Telegram bot token
-```
-
-### Example output
-
-```
-{'incoming_channel': 'LN-node1-alias', 'outgoing_channel': 'LN-node2-alias', 'outgoing_channel_capacity': 5000000, 'outgoing_channel_remote_balance': 2500000, 'outgoing_channel_local_balance': 2500000, 'timestamp': 1626750720, 'event_type': 'SEND', 'event_outcome': 'forward_fail_event'}
-...
-{'incoming_channel': 'LN-nodeX-alias', 'incoming_channel_capacity': 5000000, 'incoming_channel_remote_balance': 2500000, 'incoming_channel_local_balance': 7500000, 'outgoing_channel': 'LN-nodeY-alias', 'outgoing_channel_capacity': 10000000, 'outgoing_channel_remote_balance': 5000000, 'outgoing_channel_local_balance': 5000000, 'timestamp': 1626751932, 'event_type': 'FORWARD', 'event_outcome': 'settle_event'}
-```
-
+If you get a response, you should be good.
 
 ## Deployment
 
-If you want to deploy this to your node, you can use the fabric file. This is typically done from your dev machine, and not run directly on your node:
+If the bot is responding to you, the final step is making sure the process keeps on running in the background, even after your `ssh` session ends. The most standard (but somewhat hacky) way of doing this:
 
 ```
-$ pip3 install fabric3
+nohup ./stream-lnd-htlcs-bot.py --lnd-dir /home/umbrel/umbrel/lnd --tg-token MY_TG_TOKEN > /dev/null 2>&1 & disown
+```
 
-KEYPEM=~/.path/to/key.pem
-USER=<user>
-HOST=<ip>
+If you ever need to kill the process, you can safely do so:
 
-$ alias fab='/usr/local/bin/fab -i ${KEYPEM} -H ${USER}@${HOST} ${*}'
-
-e.g
-
-$ fab --list
-
-Available tasks:
-
-  clear-logs                 Clear the logs
-  install                    Clone or pull latest changes from the repo
-  install-supervisord        Install supervisord
-  install-supervisord-conf   Install supervisord config
-  restart                    Restart the app
-  start                      Start the app
-  stop                       Stop the app
-  sync                       Perform an rsync to test latest changes
-
-$ fab install-supervisord-conf --help
-
-Usage: fab [--core-opts] install-supervisord-conf [--options] [other tasks here ...]
-
-Docstring:
-  Install supervisord config
-
-Options:
-  -t STRING, --tg-token=STRING
-
-$ fab <command> # e.g fab install
-
-# please note fabric commands can be chained, e.g
-
-$ fab stop clear-logs start logs
-
+```
+pkill -f stream-lnd-htlcs-bot.py
 ```
