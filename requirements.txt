@@ -10,3 +10,4 @@ pandas
 sqlalchemy
 pydantic
 openpyxl
+matplotlib
