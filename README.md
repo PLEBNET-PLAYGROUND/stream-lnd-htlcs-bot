@@ -2,7 +2,13 @@
 
 This bot sends your lightning node's live [HTLC](https://en.bitcoin.it/wiki/Hash_Time_Locked_Contracts) events as they occur. By default it sends everything, which can get noisy, so it has a `/filter` command, to selectively filter the events you are interested in.
 
-It also stores your HTLCs in a [database file](https://www.sqlite.org/index.html), so that it can send you reports. It is easy to use, and thus accessible to non-developers.
+It also stores your HTLCs in a [database file](https://www.sqlite.org/index.html), so that it can send you reports.
+
+e.g
+
+![failed htlcs report](https://i.imgur.com/Nr38Oc6.png)
+
+It is easy to use, and thus accessible to non-developers.
 
 ## Why is monitoring HTLCs important
 
