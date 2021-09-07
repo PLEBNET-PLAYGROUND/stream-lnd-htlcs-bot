@@ -10,7 +10,7 @@ After=multi-user.target
 [Service]
 Type=simple
 Restart=always
-WorkingDirectory=/home/umbrel/stream-lnd-htlcs
+WorkingDirectory=/home/umbrel/stream-lnd-htlcs-bot
 ExecStart=/usr/bin/python3 /home/umbrel/stream-lnd-htlcs-bot/stream-lnd-htlcs-bot.py --lnd-dir /home/umbrel/umbrel/lnd
 StandardInput=tty-force
 User=umbrel
