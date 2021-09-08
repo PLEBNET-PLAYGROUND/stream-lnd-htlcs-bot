@@ -97,7 +97,10 @@ def help_func(update: Update, context: CallbackContext) -> None:
             /filter select( .event_outcome | contains("link_fail_event"))
 
             # filter for failed events, and format to plain text
-            /filter select( .event_outcome | contains("link_fail_event")) | to_entries[] | "\\(.key)=\\(.value)" 
+            /filter select( .event_outcome | contains("link_fail_event")) | to_entries[] | "\(.key)=\(.value)"
+
+            # filter for failed events, but exclude probes
+            /filter select( (.event_outcome | contains("link_fail_event")) and (.failure_detail | contains("UNKNOWN_INVOICE") | not) )
             """
         )
     )
