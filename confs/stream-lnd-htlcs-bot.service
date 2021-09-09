@@ -4,14 +4,14 @@
 #
 
 [Unit]
-Description=Stream LND HTLCS Service
+Description=Stream LND HTLCS Bot Service
 After=multi-user.target
 
 [Service]
 Type=simple
 Restart=always
 WorkingDirectory=/home/umbrel/stream-lnd-htlcs-bot
-ExecStart=/usr/bin/python3 /home/umbrel/stream-lnd-htlcs-bot/stream-lnd-htlcs-bot.py --lnd-dir /home/umbrel/umbrel/lnd
+ExecStart=/usr/bin/python3 /home/umbrel/stream-lnd-htlcs-bot/stream-lnd-htlcs-bot.py --tg-token <TG_TOKEN> --lnd-dir /home/umbrel/umbrel/lnd
 StandardInput=tty-force
 User=umbrel
 Group=umbrel
