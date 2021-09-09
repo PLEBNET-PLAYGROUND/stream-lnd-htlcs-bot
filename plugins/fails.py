@@ -58,11 +58,11 @@ def main(update: Update, context: CallbackContext) -> None:
             table = table.resample("10min").sum()
 
             # let's use an exponential 6 hour half-life moving window
-            table = (
-                table.ewm(halflife="6 hours", times=table.index)
-                .mean()
-                .fillna(0)  # replace NaNs with 0s
-            )
+            # table = (
+            #     table.ewm(halflife="6 hours", times=table.index)
+            #     .mean()
+            #     .fillna(0)  # replace NaNs with 0s
+            # )
             if debug:
                 table.to_csv(f"link_fail_events_{direction}.csv")
             return table

@@ -88,7 +88,7 @@ def sync(c, env=dict(KEYPEM=os.environ["KEYPEM"])):
     Perform an rsync to test latest changes
     """
     c.run(f"mkdir -p /home/{c.user}/src/stream-lnd-htlcs-bot/")
-    cmd = f"""rsync -azv -e 'ssh -i {env["KEYPEM"]}' . {c.user}@{c.host}:/home/{c.user}/src/stream-lnd-htlcs-bot/"""
+    cmd = f"""rsync -azv -e 'ssh -i {env["KEYPEM"]}' . {c.user}@{c.host}:/home/{c.user}/src/stream-lnd-htlcs-bot/ --exclude stream-lnd-htlcs-bot.db"""
     c.run(f"mkdir -p /home/{c.user}/src/stream-lnd-htlcs-bot/")
     print(cmd)
     c.local(cmd)
