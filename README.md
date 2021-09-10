@@ -6,7 +6,7 @@ It also stores your HTLCs in a [database file](https://www.sqlite.org/index.html
 
 e.g
 
-![failed htlcs report](https://i.imgur.com/Nr38Oc6.png)
+![failed htlcs report](https://i.imgur.com/m2tzmLL.jpg)
 
 It is easy to use, and thus accessible to non-developers.
 
