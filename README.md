@@ -90,7 +90,7 @@ mkdir -p src
 cd src
 
 # clone this repo
-git clone https://github.com/routablespace/stream-lnd-htlcs-bot.git
+git clone https://github.com/PLEBNET-PLAYGROUND/stream-lnd-htlcs-bot.git
 
 # enter the cloned repo
 cd stream-lnd-htlcs-bot
