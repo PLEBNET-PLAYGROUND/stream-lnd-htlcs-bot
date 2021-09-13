@@ -1,12 +1,3 @@
-#                  __       __   __
-#   _______  __ __/ /____ _/ /  / /__   ___ ___  ___ ________
-#  / __/ _ \/ // / __/ _ `/ _ \/ / -_) (_-</ _ \/ _ `/ __/ -_)
-# /_/  \___/\_,_/\__/\_,_/_.__/_/\__(_)___/ .__/\_,_/\__/\__/
-#                                        /_/
-# We route payments.
-# Provided as is. Use at own risk of being awesome.
-#
-
 from tempfile import NamedTemporaryFile
 import os
 
