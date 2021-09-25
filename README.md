@@ -96,6 +96,7 @@ git clone https://github.com/PLEBNET-PLAYGROUND/stream-lnd-htlcs-bot.git
 cd stream-lnd-htlcs-bot
 
 # install the dependencies
+sudo apt-get install python3-matplotlib (needed at least on raspiblitz)
 pip3 install -r requirements.txt
 
 # run the bot
